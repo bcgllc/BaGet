@@ -1,19 +1,8 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
-WORKDIR /app
-EXPOSE 80
-
-FROM microsoft/dotnet:2.2-sdk AS build
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs
-WORKDIR /src
-COPY /src .
-RUN dotnet restore BaGet
-RUN dotnet build BaGet -c Release -o /app
-
-FROM build AS publish
-RUN dotnet publish BaGet -c Release -o /app
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app .
+FROM microsoft/dotnet:2.1-aspnetcore-runtime
+EXPOSE 8000
+RUN apt-get update; apt-get install -y unzip; apt-get install wget -y
+RUN wget -O BaGet.zip https://github.com/bcgllc/BaGet/archive/v0.1.77-prerelease.zip \
+    && unzip BaGet.zip
+ENV ASPNETCORE_URLS="http://*:8000"
+ENV ApiKeyHash="d033ca710092adc5ccf8c253d6c90ef8d3f96eafd28c576c5e39d244264f43d1"
 ENTRYPOINT ["dotnet", "BaGet.dll"]
